@@ -1,7 +1,8 @@
-<script setup>
-import HelloWorld from './components/HelloWorld.vue'
-</script>
-
 <template>
-  <HelloWorld />
+  <router-view />
+  <ToastContainer />
 </template>
+
+<script setup>
+import ToastContainer from '@/components/ui/ToastContainer.vue'
+</script>
