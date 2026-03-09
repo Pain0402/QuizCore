@@ -1,6 +1,6 @@
 <Solution>
-  <Project Path="QuizCore.API/QuizCore.API.csproj" />
-  <Project Path="QuizCore.Application/QuizCore.Application.csproj" />
-  <Project Path="QuizCore.Domain/QuizCore.Domain.csproj" />
-  <Project Path="QuizCore.Infrastructure/QuizCore.Infrastructure.csproj" />
+  <Project Path="backend/QuizCore.API/QuizCore.API.csproj" />
+  <Project Path="backend/QuizCore.Application/QuizCore.Application.csproj" />
+  <Project Path="backend/QuizCore.Domain/QuizCore.Domain.csproj" />
+  <Project Path="backend/QuizCore.Infrastructure/QuizCore.Infrastructure.csproj" />
 </Solution>
