@@ -49,7 +49,7 @@ public class QuestionService : IQuestionService
             SubjectId = dto.SubjectId,
             Topic = dto.Topic,
             Difficulty = dto.Difficulty,
-            Type = dto.Type,
+            QuestionType = dto.Type,
             Content = dto.Content,
             CreatedById = createdById,
             Answers = dto.Answers.Select(a => new Answer { Content = a.Content, IsCorrect = a.IsCorrect }).ToList()
@@ -66,7 +66,7 @@ public class QuestionService : IQuestionService
         question.SubjectId = dto.SubjectId;
         question.Topic = dto.Topic;
         question.Difficulty = dto.Difficulty;
-        question.Type = dto.Type;
+        question.QuestionType = dto.Type;
         question.Content = dto.Content;
         
         _context.Answers.RemoveRange(question.Answers);

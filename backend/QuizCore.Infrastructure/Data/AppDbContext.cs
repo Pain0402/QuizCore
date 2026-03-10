@@ -54,7 +54,7 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<Question>(entity =>
         {
             entity.Property(e => e.Difficulty).HasConversion<string>();
-            entity.Property(e => e.Type).HasConversion<string>();
+            entity.Property(e => e.QuestionType).HasConversion<string>();
             entity.HasQueryFilter(e => !e.IsDeleted);
 
             entity.HasOne(q => q.CreatedBy)
