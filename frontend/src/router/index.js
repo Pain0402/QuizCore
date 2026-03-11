@@ -38,6 +38,24 @@ const routes = [
         component: () => import('@/views/exams/ExamsView.vue'),
         meta: { title: 'Quản lý đề thi', requiresManage: true },
       },
+      {
+        path: 'exams/:id',
+        name: 'ExamDetail',
+        component: () => import('@/views/exams/ExamDetailView.vue'),
+        meta: { title: 'Chi tiết đề thi' },
+      },
+      {
+        path: 'exam-taking/:attemptId',
+        name: 'ExamTaking',
+        component: () => import('@/views/exam-taking/ExamTakingView.vue'),
+        meta: { title: 'Làm bài thi' },
+      },
+      {
+        path: 'exam-result/:attemptId',
+        name: 'ExamResult',
+        component: () => import('@/views/exam-taking/ExamResultView.vue'),
+        meta: { title: 'Kết quả thi' },
+      },
     ],
   },
 
