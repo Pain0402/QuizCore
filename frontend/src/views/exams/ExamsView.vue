@@ -47,10 +47,11 @@
         <p style="font-size:0.85rem;margin-bottom:16px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">
           {{ exam.description || 'Không có mô tả' }}
         </p>
-        <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:16px;padding-top:14px;border-top:1px solid var(--border);align-items:center">
           <span class="badge badge-muted">⏱ {{ exam.duration }} phút</span>
           <span class="badge badge-muted">🔁 {{ exam.maxAttempts }} lượt</span>
           <span class="badge badge-info">📊 {{ exam.totalMark || 100 }} điểm</span>
+          <RouterLink :to="`/exams/${exam.id}`" class="btn btn-primary btn-sm" style="margin-left:auto">Vào thi →</RouterLink>
         </div>
       </div>
     </div>
