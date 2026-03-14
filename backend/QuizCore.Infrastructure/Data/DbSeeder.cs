@@ -22,7 +22,7 @@ public static class DbSeeder
                 FullName = "System Administrator",
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword("Admin@123"),
                 Role = UserRole.Admin,
-                Status = "active"
+                Status = UserStatus.Active
             };
 
             context.Users.Add(adminUser);

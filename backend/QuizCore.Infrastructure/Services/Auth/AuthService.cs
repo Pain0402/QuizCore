@@ -20,7 +20,7 @@ public class AuthService : IAuthService
     public async Task<AuthResponse?> LoginAsync(LoginRequest request)
     {
         var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == request.Username);
-        if (user == null || user.Status != "active") return null;
+        if (user == null || user.Status != QuizCore.Domain.Enums.UserStatus.Active) return null;
 
         if (!BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
             return null;
