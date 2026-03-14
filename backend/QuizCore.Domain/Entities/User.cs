@@ -12,12 +12,11 @@ public class User
     public string FullName { get; set; } = string.Empty;
     public string? Email { get; set; }
     public UserRole Role { get; set; }
-    public string Status { get; set; } = "active";
+    public UserStatus Status { get; set; } = UserStatus.Active;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     public ICollection<UserClass> UserClasses { get; set; } = new List<UserClass>();
     public ICollection<ExamAttempt> ExamAttempts { get; set; } = new List<ExamAttempt>();
-    // Navigation for Exams & Questions created by the user (if teacher/admin)
     public ICollection<Exam> CreatedExams { get; set; } = new List<Exam>();
     public ICollection<Question> CreatedQuestions { get; set; } = new List<Question>();
 }
