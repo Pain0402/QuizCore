@@ -7,11 +7,15 @@ using QuizCore.Application.Interfaces.Auth;
 using QuizCore.Application.Interfaces.Questions;
 using QuizCore.Application.Interfaces.Exams;
 using QuizCore.Application.Interfaces.Attempts;
+using QuizCore.Application.Interfaces.Users;
+using QuizCore.Application.Interfaces.Classes;
 using QuizCore.Infrastructure.Data;
 using QuizCore.Infrastructure.Services.Auth;
 using QuizCore.Infrastructure.Services.Questions;
 using QuizCore.Infrastructure.Services.Exams;
 using QuizCore.Infrastructure.Services.Attempts;
+using QuizCore.Infrastructure.Services.Users;
+using QuizCore.Infrastructure.Services.Classes;
 using QuizCore.API.Middlewares;
 using QuizCore.Domain.Entities;
 
@@ -58,6 +62,8 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IQuestionService, QuestionService>();
 builder.Services.AddScoped<IExamService, ExamService>();
 builder.Services.AddScoped<IAttemptService, AttemptService>();
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IClassService, ClassService>();
 
 // Add Controllers
 builder.Services.AddControllers().AddJsonOptions(options =>
