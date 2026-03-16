@@ -56,6 +56,19 @@ const routes = [
         component: () => import('@/views/exam-taking/ExamResultView.vue'),
         meta: { title: 'Kết quả thi' },
       },
+      // Admin
+      {
+        path: 'admin/users',
+        name: 'AdminUsers',
+        component: () => import('@/views/admin/UsersView.vue'),
+        meta: { title: 'Quản lý người dùng', requiresAdmin: true },
+      },
+      {
+        path: 'admin/classes',
+        name: 'AdminClasses',
+        component: () => import('@/views/admin/ClassesView.vue'),
+        meta: { title: 'Quản lý lớp học', requiresAdmin: true },
+      },
     ],
   },
 
@@ -84,6 +97,10 @@ router.beforeEach((to, from, next) => {
   }
 
   if (to.meta.requiresManage && !authStore.canManage) {
+    return next({ name: 'Dashboard' })
+  }
+
+  if (to.meta.requiresAdmin && authStore.user?.role !== 'Admin') {
     return next({ name: 'Dashboard' })
   }
 
