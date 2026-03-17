@@ -31,7 +31,7 @@ public class AuthService : IAuthService
         {
             Token = token,
             ExpiresIn = expiresIn,
-            User = new UserDto { Id = user.Id, FullName = user.FullName, Role = user.Role.ToString().ToLower() }
+            User = new UserDto { Id = user.Id, FullName = user.FullName, Role = user.Role.ToString() }
         };
     }
 }

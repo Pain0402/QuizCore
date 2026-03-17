@@ -16,7 +16,7 @@ public class Question
     public Category? Category { get; set; }
 
     public QuestionDifficulty Difficulty { get; set; }
-    public QuestionType Type { get; set; }
+    public QuestionType QuestionType { get; set; }
     public string Content { get; set; } = string.Empty;
 
     public int CreatedById { get; set; }
