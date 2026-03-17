@@ -27,9 +27,9 @@
       </select>
       <select v-model="filterType" class="form-control" style="width:auto">
         <option value="">Tất cả loại</option>
-        <option value="SingleChoice">Một đáp án</option>
-        <option value="MultipleChoice">Nhiều đáp án</option>
-        <option value="TrueFalse">Đúng/Sai</option>
+        <option value="Single">Một đáp án</option>
+        <option value="Multiple">Nhiều đáp án</option>
+        <option value="Short">Đúng/Sai</option>
       </select>
       <button class="btn btn-secondary" @click="fetchQuestions">
         <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -114,9 +114,9 @@
                 <div class="form-group">
                   <label class="form-label">Loại câu hỏi</label>
                   <select v-model="form.questionType" class="form-control">
-                    <option value="SingleChoice">Một đáp án</option>
-                    <option value="MultipleChoice">Nhiều đáp án</option>
-                    <option value="TrueFalse">Đúng/Sai</option>
+                    <option value="Single">Một đáp án</option>
+                    <option value="Multiple">Nhiều đáp án</option>
+                    <option value="Short">Đúng/Sai</option>
                   </select>
                 </div>
                 <div class="form-group">
@@ -209,12 +209,12 @@ const filterType       = ref('')
 
 const form = reactive({
   content: '',
-  questionType: 'SingleChoice',
+  questionType: 'Single',
   difficulty: 'Medium',
   answers: [],
 })
 
-const typeLabels       = { SingleChoice: 'Một đáp án', MultipleChoice: 'Nhiều đáp án', TrueFalse: 'Đúng/Sai' }
+const typeLabels       = { Single: 'Một đáp án', Multiple: 'Nhiều đáp án', Short: 'Đúng/Sai', SingleChoice: 'Một đáp án', MultipleChoice: 'Nhiều đáp án', TrueFalse: 'Đúng/Sai' }
 const difficultyLabels = { Easy: 'Dễ', Medium: 'Trung bình', Hard: 'Khó' }
 const difficultyBadge  = { Easy: 'badge-success', Medium: 'badge-warning', Hard: 'badge-danger' }
 
