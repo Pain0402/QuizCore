@@ -163,6 +163,8 @@ const form = reactive({
   maxAttempts: 1,
   totalMark: 100,
   passMark: 50,
+  subjectId: 1,
+  questionIds: [],
 })
 
 const filteredExams = computed(() =>
