@@ -10,13 +10,15 @@
       <!-- TOP BAR -->
       <div class="exam-topbar">
         <div class="exam-topbar-left">
-          <div class="stat-icon" style="width:32px;height:32px;font-size:1rem;background:var(--primary-light)">📝</div>
+          <div class="stat-icon" style="width:32px;height:32px;font-size:1rem;background:var(--primary-light);color:var(--primary)">
+            <FileQuestion :size="18" />
+          </div>
           <span class="exam-topbar-title">{{ attempt.examTitle }}</span>
         </div>
 
         <!-- Timer -->
         <div class="exam-timer" :class="{ 'timer-warning': secondsLeft < 300, 'timer-danger': secondsLeft < 60 }">
-          <span class="timer-icon">⏱️</span>
+          <span class="timer-icon" style="display:flex"><Clock :size="18" /></span>
           <span class="timer-value">{{ formattedTime }}</span>
         </div>
 
@@ -26,7 +28,7 @@
           </span>
           <button class="btn btn-success" @click="confirmSubmit" :disabled="submitting">
             <span v-if="submitting" class="spinner"></span>
-            {{ submitting ? 'Đang nộp...' : '✅ Nộp bài' }}
+            <CheckCircle2 v-if="!submitting" :size="18" style="margin-right:6px" /> {{ submitting ? 'Đang nộp...' : 'Nộp bài' }}
           </button>
         </div>
       </div>
@@ -72,7 +74,7 @@
               <span class="badge badge-primary">Câu {{ currentIndex + 1 }}/{{ attempt.questions.length }}</span>
               <span class="badge badge-muted">{{ typeLabels[currentQuestion.questionType] }}</span>
               <span v-if="autosaveStatus" class="badge badge-success" style="margin-left:auto;font-size:0.72rem">
-                ✓ Đã lưu
+                <Check :size="12" stroke-width="3" /> Đã lưu
               </span>
             </div>
 
@@ -110,7 +112,7 @@
                 Câu tiếp →
               </button>
               <button v-else class="btn btn-success" @click="confirmSubmit">
-                Nộp bài ✅
+                <CheckCircle2 :size="18" style="margin-right:4px" /> Nộp bài
               </button>
             </div>
           </div>
@@ -126,7 +128,7 @@
             <h3 class="modal-title">Xác nhận nộp bài</h3>
           </div>
           <div class="modal-body">
-            <div style="text-align:center;margin-bottom:16px;font-size:2rem">📤</div>
+            <div style="text-align:center;margin-bottom:16px;color:var(--primary);display:flex;justify-content:center"><Send :size="48" stroke-width="1.5" /></div>
             <p style="text-align:center;margin-bottom:12px">Bạn có chắc muốn nộp bài?</p>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:12px;background:var(--bg-elevated);border-radius:var(--radius);font-size:0.875rem">
               <div style="text-align:center">
@@ -157,6 +159,7 @@ import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { attemptsApi } from '@/api/attempts'
 import { useNotificationStore } from '@/stores/notification'
+import { FileQuestion, Clock, CheckCircle2, Check, Send } from 'lucide-vue-next'
 
 const route  = useRoute()
 const router = useRouter()
@@ -359,12 +362,14 @@ onUnmounted(() => {
 
 .exam-topbar {
   position: fixed;
-  top: 0;
+  top: 12px;
   left: var(--sidebar-width);
-  right: 0;
-  height: 60px;
+  right: 12px;
+  height: 73px;
   background: var(--bg-surface);
-  border-bottom: 1px solid var(--border);
+  border: none;
+  box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 2px 6px 2px;
+  border-radius: 15px;
   display: flex;
   align-items: center;
   padding: 0 24px;
@@ -424,19 +429,22 @@ onUnmounted(() => {
 
 .exam-body {
   display: flex;
-  margin-top: 60px;
-  min-height: calc(100vh - 60px);
+  margin-top: calc(73px + 12px);
+  min-height: calc(100vh - 73px - 24px);
+  gap: 12px;
 }
 
 .exam-nav-panel {
-  width: 200px;
+  width: 220px;
   flex-shrink: 0;
   background: var(--bg-surface);
-  border-right: 1px solid var(--border);
+  border: none;
+  box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 2px 6px 2px;
+  border-radius: 15px;
   padding: 20px 14px;
   position: sticky;
-  top: 60px;
-  height: calc(100vh - 60px);
+  top: calc(73px + 24px);
+  height: calc(100vh - 73px - 36px);
   overflow-y: auto;
 }
 
@@ -475,6 +483,11 @@ onUnmounted(() => {
   flex: 1;
   padding: 28px 32px;
   overflow-y: auto;
+  background: var(--bg-surface);
+  border: none;
+  box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 2px 6px 2px;
+  border-radius: 15px;
+  height: calc(100vh - 73px - 36px);
 }
 
 .exam-question-card {
