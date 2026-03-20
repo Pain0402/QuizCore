@@ -3,7 +3,9 @@
     <!-- Header -->
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px">
       <div>
-        <h1 style="font-size:1.4rem;margin-bottom:4px">👥 Quản lý người dùng</h1>
+        <h1 style="font-size:1.4rem;margin-bottom:4px;display:flex;align-items:center;gap:8px">
+          <Users :size="24" :stroke-width="2.5" /> Quản lý người dùng
+        </h1>
         <p>Tạo, chỉnh sửa và quản lý tài khoản trong hệ thống</p>
       </div>
       <button class="btn btn-primary" @click="openCreate">+ Thêm người dùng</button>
@@ -12,7 +14,7 @@
     <!-- Toolbar -->
     <div class="toolbar">
       <div class="search-box">
-        <span class="search-icon">🔍</span>
+        <span class="search-icon" style="display:flex;align-items:center"><Search :size="16" /></span>
         <input v-model="search" class="form-control" placeholder="Tìm theo tên, username, email..." @input="debouncedLoad" />
       </div>
       <select v-model="filterRole" class="form-control" style="width:160px" @change="loadUsers">
@@ -65,12 +67,13 @@
             <td style="color:var(--text-muted);font-size:0.85rem">{{ fmtDate(user.createdAt) }}</td>
             <td>
               <div style="display:flex;gap:6px;justify-content:flex-end">
-                <button class="btn btn-secondary btn-sm" @click="openEdit(user)" title="Sửa">✏️</button>
-                <button class="btn btn-sm" :class="user.status === 'Active' ? 'btn-warning' : 'btn-success'"
+                <button class="btn btn-secondary btn-icon" @click="openEdit(user)" title="Sửa"><Pencil :size="16" stroke-width="2.5" /></button>
+                <button class="btn btn-icon" :class="user.status === 'Active' ? 'btn-warning' : 'btn-success'"
                   @click="toggleStatus(user)" :title="user.status === 'Active' ? 'Vô hiệu hóa' : 'Kích hoạt'">
-                  {{ user.status === 'Active' ? '🔒' : '🔓' }}
+                  <Lock v-if="user.status === 'Active'" :size="16" stroke-width="2.5" />
+                  <Unlock v-else :size="16" stroke-width="2.5" />
                 </button>
-                <button class="btn btn-danger btn-sm" @click="confirmDelete(user)" title="Xóa">🗑️</button>
+                <button class="btn btn-danger btn-icon" @click="confirmDelete(user)" title="Xóa"><Trash :size="16" stroke-width="2.5" /></button>
               </div>
             </td>
           </tr>
@@ -135,7 +138,7 @@
         <div class="modal modal-sm">
           <div class="modal-header"><h3 class="modal-title">Xác nhận xóa</h3></div>
           <div class="modal-body" style="text-align:center">
-            <div style="font-size:2rem;margin-bottom:8px">⚠️</div>
+            <div style="color:var(--warning);display:flex;justify-content:center;margin-bottom:12px"><ShieldAlert :size="48" :stroke-width="1.5" /></div>
             <p>Bạn có chắc muốn xóa tài khoản <strong>{{ deletingUser.fullName }}</strong>?</p>
             <p style="color:var(--danger);font-size:0.85rem;margin-top:6px">Hành động này không thể hoàn tác!</p>
           </div>
@@ -153,6 +156,7 @@
 import { ref, onMounted } from 'vue'
 import { usersApi } from '@/api/users'
 import { useNotificationStore } from '@/stores/notification'
+import { Pencil, Trash, Lock, Unlock, Search, Users, ShieldAlert } from 'lucide-vue-next'
 
 const notify = useNotificationStore()
 
@@ -168,8 +172,18 @@ let debounceTimer = null
 
 const form = ref({ fullName: '', username: '', password: '', email: '', role: 'Student', newPassword: '' })
 
-const roleBadge = (r) => ({ Admin:'badge-danger', Teacher:'badge-primary', Student:'badge-muted' }[r] || 'badge-muted')
-const roleLabel = (r) => ({ Admin:'Quản trị', Teacher:'Giáo viên', Student:'Học sinh' }[r] || r)
+const roleBadge = (r) => {
+  if (r === 'Admin' || r === 0) return 'badge-danger'
+  if (r === 'Teacher' || r === 1) return 'badge-primary'
+  if (r === 'Student' || r === 2) return 'badge-muted'
+  return 'badge-muted'
+}
+const roleLabel = (r) => {
+  if (r === 'Admin' || r === 0) return 'Quản trị'
+  if (r === 'Teacher' || r === 1) return 'Giáo viên'
+  if (r === 'Student' || r === 2) return 'Học viên'
+  return String(r)
+}
 const fmtDate = (d) => d ? new Date(d).toLocaleDateString('vi-VN') : '—'
 
 function debouncedLoad() {

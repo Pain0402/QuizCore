@@ -41,7 +41,7 @@
         <div style="display:flex;gap:12px;margin-top:8px">
           <RouterLink to="/exams" class="btn btn-secondary">← Danh sách đề thi</RouterLink>
           <button class="btn btn-primary" @click="showReview = !showReview">
-            {{ showReview ? 'Ẩn' : '📋 Xem' }} chi tiết đáp án
+            <ClipboardList :size="18" style="margin-right:6px" /> {{ showReview ? 'Ẩn' : 'Xem' }} chi tiết đáp án
           </button>
         </div>
       </div>
@@ -56,8 +56,10 @@
             :class="q.isCorrect ? 'review-correct' : 'review-wrong'"
           >
             <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:14px">
-              <span class="badge" :class="q.isCorrect ? 'badge-success' : 'badge-danger'">
-                {{ q.isCorrect ? '✓' : '✗' }} Câu {{ i + 1 }}
+              <span class="badge" :class="q.isCorrect ? 'badge-success' : 'badge-danger'" style="padding-left:8px">
+                <Check v-if="q.isCorrect" :size="14" stroke-width="3" />
+                <X v-else :size="14" stroke-width="3" />
+                Câu {{ i + 1 }}
               </span>
               <span style="font-weight:500;color:var(--text-primary);flex:1">{{ q.content }}</span>
             </div>
@@ -72,8 +74,9 @@
                   'review-ans-selected': ans.wasSelected && !ans.isCorrect,
                 }"
               >
-                <span class="review-ans-icon">
-                  {{ ans.isCorrect ? '✅' : (ans.wasSelected ? '❌' : '') }}
+                <span class="review-ans-icon" style="display:flex;align-items:center;justify-content:center">
+                  <CheckCircle2 v-if="ans.isCorrect" :size="18" color="var(--success)" />
+                  <XCircle v-else-if="ans.wasSelected" :size="18" color="var(--danger)" />
                 </span>
                 <span>{{ ans.content }}</span>
                 <span v-if="ans.wasSelected && !ans.isCorrect"
@@ -94,6 +97,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { attemptsApi } from '@/api/attempts'
 import { useNotificationStore } from '@/stores/notification'
+import { Check, X, CheckCircle2, XCircle, ClipboardList } from 'lucide-vue-next'
 
 const route  = useRoute()
 const notify = useNotificationStore()

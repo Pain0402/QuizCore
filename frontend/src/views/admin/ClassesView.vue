@@ -3,7 +3,9 @@
     <!-- Header -->
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px">
       <div>
-        <h1 style="font-size:1.4rem;margin-bottom:4px">🏫 Quản lý lớp học</h1>
+        <h1 style="font-size:1.4rem;margin-bottom:4px;display:flex;align-items:center;gap:8px">
+          <GraduationCap :size="24" :stroke-width="2.5" /> Quản lý lớp học
+        </h1>
         <p>Tổ chức học sinh theo lớp và năm học</p>
       </div>
       <button class="btn btn-primary" @click="openCreate">+ Tạo lớp mới</button>
@@ -21,21 +23,21 @@
       <div v-for="cls in classes" :key="cls.id" class="card card-hover" style="cursor:default">
         <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px">
           <div style="display:flex;align-items:center;gap:10px">
-            <div class="stat-icon" style="width:40px;height:40px;font-size:1.2rem;background:var(--info-light)">🏫</div>
+            <div class="stat-icon" style="width:40px;height:40px;background:var(--info-light);color:var(--info);display:flex;align-items:center;justify-content:center;border-radius:var(--radius-sm)"><UsersRound :size="20" stroke-width="2.5" /></div>
             <div>
               <div style="font-weight:700;font-size:1.05rem;color:var(--text-primary)">{{ cls.name }}</div>
               <div style="font-size:0.78rem;color:var(--text-muted)">Năm học: {{ cls.academicYear || '—' }}</div>
             </div>
           </div>
           <div style="display:flex;gap:6px">
-            <button class="btn btn-secondary btn-sm" @click="openEdit(cls)" title="Sửa">✏️</button>
-            <button class="btn btn-danger btn-sm" @click="confirmDelete(cls)" title="Xóa">🗑️</button>
+            <button class="btn btn-secondary btn-icon" @click="openEdit(cls)" title="Sửa"><Pencil :size="16" stroke-width="2.5" /></button>
+            <button class="btn btn-danger btn-icon" @click="confirmDelete(cls)" title="Xóa"><Trash :size="16" stroke-width="2.5" /></button>
           </div>
         </div>
 
-        <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-top:1px solid var(--border)">
-          <span style="color:var(--text-muted);font-size:0.85rem">👤 {{ cls.studentCount }} học sinh</span>
-          <button class="btn btn-sm" style="background:var(--primary-light);color:var(--primary);border:1px solid var(--primary-border)"
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-top:2px solid var(--border-strong)">
+          <span style="color:var(--text-muted);font-size:0.85rem;display:flex;align-items:center;gap:6px"><Users :size="16" /> {{ cls.studentCount }} học sinh</span>
+          <button class="btn btn-sm" style="background:var(--primary-light);color:var(--primary)"
             @click="openManageStudents(cls)">
             Quản lý học sinh →
           </button>
@@ -77,8 +79,8 @@
       <div v-if="managingClass" class="modal-overlay">
         <div class="modal" style="max-width:700px">
           <div class="modal-header">
-            <h3 class="modal-title">👥 Danh sách học sinh – {{ managingClass.name }}</h3>
-            <button class="modal-close" @click="managingClass=null">✕</button>
+            <h3 class="modal-title" style="display:flex;align-items:center;gap:8px"><UsersRound :size="20"/> Danh sách học sinh – {{ managingClass.name }}</h3>
+            <button class="modal-close" @click="managingClass=null"><X :size="20"/></button>
           </div>
           <div class="modal-body">
             <!-- Assign new students -->
@@ -100,19 +102,19 @@
               Chưa có học sinh trong lớp
             </div>
             <table v-else class="table" style="margin-bottom:0">
-              <thead><tr><th>Học sinh</th><th>Username</th><th>Email</th><th></th></tr></thead>
+              <thead><tr><th>Học sinh</th><th>Username</th><th>Email</th><th style="text-align:right"></th></tr></thead>
               <tbody>
                 <tr v-for="st in classStudents" :key="st.userId" class="table-row">
                   <td>
                     <div style="display:flex;align-items:center;gap:8px">
                       <div class="user-avatar-sm">{{ st.fullName[0]?.toUpperCase() }}</div>
-                      {{ st.fullName }}
+                      <span style="font-weight:600">{{ st.fullName }}</span>
                     </div>
                   </td>
                   <td>@{{ st.username }}</td>
                   <td style="color:var(--text-muted)">{{ st.email || '—' }}</td>
-                  <td>
-                    <button class="btn btn-danger btn-sm" @click="removeStudent(st.userId)" title="Xóa khỏi lớp">✕</button>
+                  <td style="text-align:right">
+                    <button class="btn btn-danger btn-icon" @click="removeStudent(st.userId)" title="Xóa khỏi lớp"><UserX :size="16" stroke-width="2.5"/></button>
                   </td>
                 </tr>
               </tbody>
@@ -131,7 +133,7 @@
         <div class="modal modal-sm">
           <div class="modal-header"><h3 class="modal-title">Xác nhận xóa</h3></div>
           <div class="modal-body" style="text-align:center">
-            <div style="font-size:2rem;margin-bottom:8px">⚠️</div>
+            <div style="color:var(--warning);display:flex;justify-content:center;margin-bottom:12px"><ShieldAlert :size="48" :stroke-width="1.5" /></div>
             <p>Bạn có chắc muốn xóa lớp <strong>{{ deletingClass.name }}</strong>?</p>
           </div>
           <div class="modal-footer">
@@ -149,6 +151,7 @@ import { ref, onMounted, computed } from 'vue'
 import { classesApi } from '@/api/classes'
 import { usersApi } from '@/api/users'
 import { useNotificationStore } from '@/stores/notification'
+import { Pencil, Trash, UserX, Users, GraduationCap, UsersRound, X, ShieldAlert } from 'lucide-vue-next'
 
 const notify = useNotificationStore()
 
