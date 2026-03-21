@@ -28,10 +28,21 @@ public class ExamsController : ControllerBase
     }
 
     [HttpGet("{id}")]
-    public async Task<IActionResult> Get(int id)
+    [AllowAnonymous]
+    public async Task<IActionResult> Get(int id, [FromServices] QuizCore.Infrastructure.Data.AppDbContext db)
     {
         var exam = await _examService.GetByIdAsync(id);
-        return Ok(new { success = true, data = exam });
+        int remainingAttempts = exam.MaxAttempts;
+        
+        var userIdStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (int.TryParse(userIdStr, out var userId))
+        {
+            var usedAttempts = await Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.CountAsync(
+                db.ExamAttempts, a => a.ExamId == id && a.UserId == userId && !a.IsDeleted);
+            remainingAttempts = System.Math.Max(0, exam.MaxAttempts - usedAttempts);
+        }
+
+        return Ok(new { success = true, data = exam, remainingAttempts });
     }
 
     [HttpPost]

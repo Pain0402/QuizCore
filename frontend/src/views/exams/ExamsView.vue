@@ -16,7 +16,7 @@
     <!-- Toolbar -->
     <div class="toolbar">
       <div class="search-box">
-        <span class="search-icon">🔍</span>
+        <span class="search-icon"><Search :size="16" /></span>
         <input v-model="search" class="form-control" placeholder="Tìm kiếm đề thi..." />
       </div>
       <button class="btn btn-secondary" @click="fetchExams">
@@ -39,8 +39,8 @@
         <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px">
           <span class="badge badge-primary">📝 Đề thi</span>
           <div style="display:flex;gap:6px">
-            <button class="btn btn-ghost btn-icon btn-sm" @click="openEdit(exam)">✏️</button>
-            <button class="btn btn-danger btn-icon btn-sm" @click="confirmDelete(exam)">🗑️</button>
+            <button class="btn btn-ghost btn-icon btn-icon" @click="openEdit(exam)"><Pencil :size="16" stroke-width="2.5" /></button>
+            <button class="btn btn-danger btn-icon btn-icon" @click="confirmDelete(exam)"><Trash :size="16" stroke-width="2.5" /></button>
           </div>
         </div>
         <h3 style="font-size:1rem;margin-bottom:8px;color:var(--text-primary)">{{ exam.title }}</h3>
@@ -142,6 +142,7 @@
 </template>
 
 <script setup>
+import { Pencil, Trash, Search, ShieldAlert, FileQuestion, BookOpen, Clock } from 'lucide-vue-next'
 import { ref, computed, onMounted, reactive } from 'vue'
 import { examsApi } from '@/api/exams'
 import { useNotificationStore } from '@/stores/notification'

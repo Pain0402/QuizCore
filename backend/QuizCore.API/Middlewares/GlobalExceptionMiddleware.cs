@@ -39,8 +39,8 @@ public class GlobalExceptionMiddleware
         var result = JsonSerializer.Serialize(new
         {
             success = false,
-            message = "An internal server error occurred.",
-            details = exception.Message // In production, hide this or use environment check
+            message = exception.Message,
+            details = exception.StackTrace
         });
 
         return context.Response.WriteAsync(result);

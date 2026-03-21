@@ -18,7 +18,7 @@
           <div class="card">
             <div style="display:flex;align-items:flex-start;gap:16px;margin-bottom:20px">
               <div class="stat-icon" style="width:52px;height:52px;font-size:1.6rem;background:var(--primary-light);flex-shrink:0">
-                📝
+                <FileQuestion :size="32" stroke-width="1.5" style="color:var(--primary)" />
               </div>
               <div>
                 <h1 style="font-size:1.5rem;margin-bottom:6px">{{ exam.title }}</h1>
@@ -29,7 +29,7 @@
             <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:16px">
               <div v-for="info in examInfo" :key="info.label"
                 style="padding:14px;background:var(--bg-elevated);border-radius:var(--radius);text-align:center;border:1px solid var(--border)">
-                <div style="font-size:1.4rem;margin-bottom:6px">{{ info.icon }}</div>
+                <div style="margin-bottom:8px;color:var(--primary);display:flex;justify-content:center"><component :is="info.icon" :size="24" stroke-width="2" /></div>
                 <div style="font-weight:700;font-size:1.1rem;color:var(--text-primary)">{{ info.value }}</div>
                 <div style="font-size:0.8rem;color:var(--text-muted)">{{ info.label }}</div>
               </div>
@@ -38,10 +38,10 @@
 
           <!-- Rules -->
           <div class="card">
-            <h3 class="card-title" style="margin-bottom:16px">📋 Quy định khi thi</h3>
+            <h3 class="card-title" style="margin-bottom:16px"><ClipboardList :size="18" style="margin-right:6px;display:inline-block;vertical-align:middle" /> Quy định khi thi</h3>
             <ul style="display:flex;flex-direction:column;gap:10px;padding-left:4px;list-style:none">
               <li v-for="rule in rules" :key="rule" style="display:flex;align-items:flex-start;gap:10px;font-size:0.875rem;color:var(--text-secondary)">
-                <span style="color:var(--warning);margin-top:1px">⚠️</span>
+                <AlertTriangle :size="16" style="color:var(--warning);margin-top:1px;flex-shrink:0" />
                 {{ rule }}
               </li>
             </ul>
@@ -51,7 +51,7 @@
         <!-- Action card -->
         <div style="position:sticky;top:calc(var(--topbar-height) + 20px)">
           <div class="card" style="text-align:center">
-            <div style="font-size:2rem;margin-bottom:8px">🎯</div>
+            <div style="margin-bottom:12px;color:var(--primary);display:flex;justify-content:center"><Target :size="48" stroke-width="1.5" /></div>
             <h3 style="margin-bottom:4px">Sẵn sàng?</h3>
             <p style="font-size:0.875rem;margin-bottom:20px">Sau khi bắt đầu, đồng hồ sẽ chạy ngay lập tức</p>
 
@@ -62,7 +62,7 @@
               </div>
               <div style="display:flex;justify-content:space-between;font-size:0.875rem">
                 <span style="color:var(--text-muted)">Số lần thi còn lại</span>
-                <span style="font-weight:600;color:var(--success)">{{ exam.maxAttempts }}</span>
+                <span style="font-weight:600" :style="remainingAttempts > 0 ? 'color:var(--success)' : 'color:var(--danger)'">{{ remainingAttempts }} / {{ exam.maxAttempts }}</span>
               </div>
               <div style="display:flex;justify-content:space-between;font-size:0.875rem">
                 <span style="color:var(--text-muted)">Điểm đạt</span>
@@ -73,7 +73,11 @@
             <button class="btn btn-primary" style="width:100%;padding:12px 24px;font-size:1rem"
               :disabled="starting" @click="handleStart">
               <span v-if="starting" class="spinner"></span>
-              {{ starting ? 'Đang khởi tạo...' : '🚀 Bắt đầu thi' }}
+              <span v-if="starting">Đang khởi tạo...</span>
+              <template v-else>
+                <PlayCircle :size="18" style="margin-right:6px;vertical-align:middle" /> 
+                <span style="vertical-align:middle">Bắt đầu thi</span>
+              </template>
             </button>
           </div>
         </div>
@@ -83,7 +87,8 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ClipboardList, AlertTriangle, Target, PlayCircle, FileQuestion, Clock, RotateCcw, Trophy, CheckCircle2 } from 'lucide-vue-next'
+import { ref, computed, onMounted, markRaw } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { examsApi } from '@/api/exams'
 import { attemptsApi } from '@/api/attempts'
@@ -96,12 +101,13 @@ const notify = useNotificationStore()
 const exam    = ref(null)
 const loading = ref(false)
 const starting = ref(false)
+const remainingAttempts = ref(0)
 
 const examInfo = computed(() => exam.value ? [
-  { icon: '⏱️', value: `${exam.value.duration} phút`, label: 'Thời gian thi' },
-  { icon: '🔄', value: exam.value.maxAttempts, label: 'Số lần thi' },
-  { icon: '🏆', value: `${exam.value.totalMark} điểm`, label: 'Tổng điểm' },
-  { icon: '✅', value: `${exam.value.passMark} điểm`, label: 'Điểm đạt' },
+  { icon: markRaw(Clock), value: `${exam.value.duration} phút`, label: 'Thời gian thi' },
+  { icon: markRaw(RotateCcw), value: exam.value.maxAttempts, label: 'Số lần thi' },
+  { icon: markRaw(Trophy), value: `${exam.value.totalMark} điểm`, label: 'Tổng điểm' },
+  { icon: markRaw(CheckCircle2), value: `${exam.value.passMark} điểm`, label: 'Điểm đạt' },
 ] : [])
 
 const rules = [
@@ -116,6 +122,7 @@ async function loadExam() {
   try {
     const { data } = await examsApi.getById(route.params.id)
     exam.value = data.data || data
+    remainingAttempts.value = data.remainingAttempts !== undefined ? data.remainingAttempts : (exam.value?.maxAttempts || 0)
   } catch {
     notify.error('Lỗi', 'Không thể tải thông tin đề thi')
   } finally {

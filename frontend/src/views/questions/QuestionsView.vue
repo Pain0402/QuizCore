@@ -16,7 +16,7 @@
     <!-- Toolbar -->
     <div class="toolbar">
       <div class="search-box">
-        <span class="search-icon">🔍</span>
+        <span class="search-icon"><Search :size="16" /></span>
         <input v-model="search" class="form-control" placeholder="Tìm kiếm câu hỏi..." />
       </div>
       <select v-model="filterDifficulty" class="form-control" style="width:auto">
@@ -77,8 +77,8 @@
             </td>
             <td>
               <div style="display:flex;gap:6px">
-                <button class="btn btn-ghost btn-icon btn-sm" title="Chỉnh sửa" @click="openEdit(q)">✏️</button>
-                <button class="btn btn-danger btn-icon btn-sm" title="Xóa" @click="confirmDelete(q)">🗑️</button>
+                <button class="btn btn-ghost btn-icon btn-icon" title="Chỉnh sửa" @click="openEdit(q)"><Pencil :size="16" stroke-width="2.5" /></button>
+                <button class="btn btn-danger btn-icon btn-icon" title="Xóa" @click="confirmDelete(q)"><Trash :size="16" stroke-width="2.5" /></button>
               </div>
             </td>
           </tr>
@@ -146,7 +146,7 @@
                     <span :class="ans.isCorrect ? 'badge-success' : 'badge-muted'" class="badge" style="flex-shrink:0">
                       {{ ans.isCorrect ? '✓ Đúng' : 'Sai' }}
                     </span>
-                    <button type="button" class="btn btn-ghost btn-icon btn-sm" @click="removeAnswer(idx)">×</button>
+                    <button type="button" class="btn btn-ghost btn-icon btn-icon" @click="removeAnswer(idx)">×</button>
                   </div>
                 </div>
               </div>
@@ -191,6 +191,7 @@
 </template>
 
 <script setup>
+import { Pencil, Trash, Search, ShieldAlert, FileQuestion, BookOpen, Clock } from 'lucide-vue-next'
 import { ref, computed, onMounted, reactive } from 'vue'
 import { questionsApi } from '@/api/questions'
 import { useNotificationStore } from '@/stores/notification'
