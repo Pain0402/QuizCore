@@ -105,6 +105,26 @@
                 </div>
               </div>
             </div>
+
+            
+            <div class="form-group" style="margin-top: 16px; border-top: 1px solid var(--border-strong); padding-top: 16px;">
+              <label class="form-label" style="display:flex; justify-content:space-between">
+                <span>Chọn câu hỏi cho đề ({{ form.questionIds.length }} câu đã chọn)</span>
+              </label>
+              <div style="max-height: 200px; overflow-y: auto; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px; background: var(--bg-elevated)">
+                <div v-if="allQuestions.length === 0" style="color:var(--text-muted); font-size:0.85rem">Chưa có câu hỏi nào trong ngân hàng.</div>
+                <label v-for="q in allQuestions" :key="q.id" style="display:flex; align-items:flex-start; gap:10px; margin-bottom:12px; cursor:pointer">
+                  <input type="checkbox" :value="q.id" v-model="form.questionIds" style="margin-top: 3px; width:16px; height:16px;" />
+                  <div style="flex:1">
+                    <div style="font-size: 0.88rem; font-weight:500; color:var(--text-primary); line-height:1.4">{{ q.content }}</div>
+                    <div style="font-size: 0.75rem; color:var(--text-muted); margin-top:2px">
+                      Loại: {{ {0:'Một đáp án',1:'Nhiều đáp án',2:'Đúng/Sai',3:'Tự luận',SingleChoice:'Một đáp án',MultipleChoice:'Nhiều đáp án',TrueFalse:'Đúng/Sai'}[q.questionType] || q.questionType }} | 
+                      Độ khó: {{ {0:'Dễ',1:'Trung bình',2:'Khó',Easy:'Dễ',Medium:'Trung bình',Hard:'Khó'}[q.difficulty] || q.difficulty }}
+                    </div>
+                  </div>
+                </label>
+              </div>
+            </div>
           </div>
           <div class="modal-footer">
             <button class="btn btn-secondary" @click="closeModal">Hủy</button>
@@ -145,9 +165,12 @@
 import { Pencil, Trash, Search, ShieldAlert, FileQuestion, BookOpen, Clock } from 'lucide-vue-next'
 import { ref, computed, onMounted, reactive } from 'vue'
 import { examsApi } from '@/api/exams'
+import { questionsApi } from '@/api/questions'
 import { useNotificationStore } from '@/stores/notification'
 
 const notify = useNotificationStore()
+
+const allQuestions = ref([])
 
 const exams       = ref([])
 const loading     = ref(false)
@@ -188,21 +211,32 @@ async function fetchExams() {
 
 function openCreate() {
   editingId.value = null
-  Object.assign(form, { title: '', description: '', duration: 60, maxAttempts: 1, totalMark: 100, passMark: 50 })
+  Object.assign(form, { title: '', description: '', duration: 60, maxAttempts: 1, totalMark: 100, passMark: 50, subjectId: 1, questionIds: [] })
   showModal.value = true
 }
 
-function openEdit(exam) {
-  editingId.value = exam.id
-  Object.assign(form, {
-    title: exam.title,
-    description: exam.description,
-    duration: exam.duration,
-    maxAttempts: exam.maxAttempts,
-    totalMark: exam.totalMark,
-    passMark: exam.passMark,
-  })
-  showModal.value = true
+async function openEdit(exam) {
+  loading.value = true
+  try {
+    const { data } = await examsApi.getById(exam.id)
+    const detailedExam = data.data || data
+    editingId.value = detailedExam.id
+    Object.assign(form, {
+      title: detailedExam.title,
+      description: detailedExam.description,
+      duration: detailedExam.duration,
+      maxAttempts: detailedExam.maxAttempts,
+      totalMark: detailedExam.totalMark,
+      passMark: detailedExam.passMark,
+      subjectId: detailedExam.subjectId || 1,
+      questionIds: detailedExam.examQuestions?.map(eq => eq.questionId) || []
+    })
+    showModal.value = true
+  } catch (e) {
+    notify.error('Lỗi', 'Không thể tải thông tin chi tiết đề thi')
+  } finally {
+    loading.value = false
+  }
 }
 
 function closeModal() { showModal.value = false }
@@ -242,5 +276,13 @@ async function doDelete() {
   }
 }
 
-onMounted(fetchExams)
+onMounted(async () => {
+  await fetchExams()
+  try {
+    const { data } = await questionsApi.getAll()
+    allQuestions.value = data.data || data || []
+  } catch {
+    console.warn('Failed to load questions')
+  }
+})
 </script>

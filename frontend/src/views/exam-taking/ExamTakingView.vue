@@ -365,7 +365,7 @@ onUnmounted(() => {
   top: 12px;
   left: var(--sidebar-width);
   right: 12px;
-  height: 73px;
+  height: 68px;
   background: var(--bg-surface);
   border: none;
   box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 2px 6px 2px;
