@@ -57,7 +57,7 @@
               <span>Câu hiện tại</span>
             </div>
             <div style="display:flex;align-items:center;gap:6px">
-              <div style="width:12px;height:12px;border-radius:3px;background:var(--success)"></div>
+              <div style="width:12px;height:12px;border-radius:3px;background:var(--success-light)"></div>
               <span>Đã trả lời</span>
             </div>
             <div style="display:flex;align-items:center;gap:6px">
@@ -160,6 +160,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { attemptsApi } from '@/api/attempts'
 import { useNotificationStore } from '@/stores/notification'
 import { FileQuestion, Clock, CheckCircle2, Check, Send } from 'lucide-vue-next'
+import * as signalR from '@microsoft/signalr'
 
 const route  = useRoute()
 const router = useRouter()
@@ -176,6 +177,7 @@ const autosaveStatus  = ref(false)
 
 let timerInterval  = null
 let autosaveTimer  = null
+let hubConnection  = null
 
 const typeLabels = {
   SingleChoice: 'Một đáp án',
@@ -313,6 +315,32 @@ function startTimers() {
   autosaveTimer = setInterval(doAutoSaveAll, 15000)
 }
 
+async function initSignalR() {
+  if (!attempt.value || !attempt.value.examId) return
+
+  hubConnection = new signalR.HubConnectionBuilder()
+    .withUrl('/api/examHub', {
+      accessTokenFactory: () => localStorage.getItem('quizcore_token')
+    })
+    .withAutomaticReconnect()
+    .build()
+
+  hubConnection.on('ReceiveForceSubmit', (message) => {
+    notify.error('Thông báo khẩn', message || 'Hết thời gian làm bài, hệ thống đang tự động thu bài...')
+    if (!submitting.value) {
+      showSubmitModal.value = false
+      doSubmit()
+    }
+  })
+
+  try {
+    await hubConnection.start()
+    await hubConnection.invoke('JoinExamSession', attempt.value.examId.toString())
+  } catch (err) {
+    console.warn('SignalR Real-time sync connection failed:', err)
+  }
+}
+
 // Handle page unload
 function handleBeforeUnload(e) {
   e.preventDefault()
@@ -333,12 +361,23 @@ onMounted(async () => {
   } else {
     await loadAttempt()
   }
+
+  await initSignalR()
   window.addEventListener('beforeunload', handleBeforeUnload)
 })
 
-onUnmounted(() => {
+onUnmounted(async () => {
   clearTimers()
   window.removeEventListener('beforeunload', handleBeforeUnload)
+  
+  if (hubConnection) {
+    try {
+      if (attempt.value?.examId) {
+        await hubConnection.invoke('LeaveExamSession', attempt.value.examId.toString())
+      }
+      await hubConnection.stop()
+    } catch { /* silent */ }
+  }
 })
 </script>
 

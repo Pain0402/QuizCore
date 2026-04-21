@@ -4,6 +4,8 @@ using QuizCore.Application.DTOs.Exams;
 using QuizCore.Application.Interfaces.Exams;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.SignalR;
+using QuizCore.API.Hubs;
 
 namespace QuizCore.API.Controllers;
 
@@ -67,5 +69,12 @@ public class ExamsController : ControllerBase
     {
         await _examService.DeleteAsync(id);
         return NoContent();
+    }
+
+    [HttpPost("{id}/force-submit")]
+    public async Task<IActionResult> ForceSubmit(int id, [FromServices] IHubContext<ExamHub> hubContext, [FromQuery] string message = "Hết thời gian làm bài, hệ thống đang tự động thu bài...")
+    {
+        await hubContext.Clients.Group($"exam_session_{id}").SendAsync("ReceiveForceSubmit", message);
+        return Ok(new { success = true, message = "Đã gửi lệnh thu bài đồng loạt." });
     }
 }

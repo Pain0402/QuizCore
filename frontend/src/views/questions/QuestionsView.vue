@@ -117,7 +117,7 @@
                   </span>
                 </td>
                 <td>
-                  <span class="badge badge-muted">{{ q.answers?.length || 0 }} đáp án</span>
+                  <span class="badge badge-muted">{{ q.answers?.length || 0 }} </span>
                 </td>
                 <td>
                   <div style="display:flex;gap:6px; justify-content: center;">

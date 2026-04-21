@@ -47,11 +47,15 @@ public class AttemptService(AppDbContext db, IDistributedCache cache) : IAttempt
         db.ExamAttempts.Add(attempt);
         await db.SaveChangesAsync();
 
-        // Save start time in Redis for timer calculation
+        // Lưu thời điểm bắt đầu làm bài vào Redis Cache để đếm giờ thay vì query xuống DB SQL gây quá tải.
+        // Setup vòng đời cho Cache (Hết hạn lưu trữ sẽ tự động xoá trên RAM).
         var opts = new DistributedCacheEntryOptions
         {
             AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(exam.Duration * 60 + 300)
         };
+        
+        // Ghi dữ liệu vào Redis Cache. 
+        // Dùng ToString("o") để format Thời gian ra chuẩn quốc tế ISO UTC (chống lỗi lệch múi giờ Server).
         await cache.SetStringAsync(TimerKey(attempt.Id),
             attempt.StartedAt.ToString("o"), opts);
 
@@ -94,11 +98,16 @@ public class AttemptService(AppDbContext db, IDistributedCache cache) : IAttempt
         var attempt = await GetActiveAttemptAsync(attemptId, userId);
         var key = RedisKey(attemptId);
 
-        // Load current answers from Redis
+        // Đọc toàn bộ lịch sử đáp án đã lưu nháp trước đó từ mặt RAM (Redis) lên (dạng Dictionary).
         var existing = await LoadAnswersFromRedis(key);
+        
+        // Cập nhật/Ghi đè đáp án học sinh vừa click vào đúng Câu hỏi đó.
         existing[request.QuestionId] = request.SelectedAnswerIds;
 
         var exam = await db.Exams.FindAsync(attempt.ExamId)!;
+        
+        // Ghi đè toàn bộ bộ nháp mới này vào lại Redis bằng JSON. 
+        // Lợi ích: Dù 100 học sinh bấm tick đáp án liên tục, Redis trên RAM vẫn cân mượt mà, cứu SQL Database khỏi tình trạng quá tải (Deadlock).
         var opts = new DistributedCacheEntryOptions
         {
             AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds((exam!.Duration * 60) + 300)
@@ -216,14 +225,17 @@ public class AttemptService(AppDbContext db, IDistributedCache cache) : IAttempt
     }
 
     // ─────────────────────────────────────────────
+    // Chức năng Helper (đóng gói kết quả) - Tái sử dụng chung cho cả lúc Vừa Nộp Bài và lúc Tra Cứu Lịch Sử Thi.
     private static AttemptResultResponse BuildResult(ExamAttempt attempt, Exam exam,
         int correctCount, int totalQuestions, List<AttemptDetail>? details = null)
     {
+        // Quyết định Đậu/Rớt: So sánh Điểm thực tế đạt được (Score) với Mốc Điểm Chuẩn do Giáo viên set (PassMark)
         var isPassed = attempt.Score >= exam.PassMark;
 
         var review = exam.ExamQuestions.OrderBy(eq => eq.Order).Select(eq =>
         {
             var q = eq.Question;
+            // Rà soát trong lịch sử (details) để nhặt ra tất cả các "ID Đáp Án" mà học sinh dã click chọn ở câu hỏi này.
             var selectedIds = details?
                 .Where(d => d.QuestionId == q.Id)
                 .Select(d => d.AnswerId)
@@ -233,13 +245,20 @@ public class AttemptService(AppDbContext db, IDistributedCache cache) : IAttempt
             {
                 QuestionId = q.Id,
                 Content = q.Content,
+                // Phán định Câu hỏi rốt cuộc Đúng hay Sai (IsCorrect) 
+                // Bằng cách dùng Hashset `SetEquals` để ép khớp hoàn toàn "Nhóm Đáp Án Chuẩn" với "Nhóm Đáp án Học Sinh Tick" -> Rất hiệu quả cho Trắc nghiệm nhiều lựa chọn.
                 IsCorrect = q.Answers.Where(a => a.IsCorrect).Select(a => (int?)a.Id).ToHashSet()
                               .SetEquals(selectedIds),
+                
                 Answers = q.Answers.Select(a => new AnswerReviewDto
                 {
                     AnswerId = a.Id,
                     Content = a.Content,
+                    // Lột trần đáp án chuẩn đít thực sự (Dành cho việc tô xanh những phần học sinh lỡ bỏ qua)
                     IsCorrect = a.IsCorrect,
+                    
+                    // Cờ WasSelected: Cực kỳ quan trọng. 
+                    // Nhờ phối hợp 2 cờ này (Code Vue ở Frontend: IsCorrect && WasSelected), giáo viên dễ dàng tô màu Nền Xanh cho ô khoanh Đúng, và tô Nền Đỏ cho ô Học sinh đánh Sai.
                     WasSelected = selectedIds.Contains((int?)a.Id)
                 }).ToList()
             };

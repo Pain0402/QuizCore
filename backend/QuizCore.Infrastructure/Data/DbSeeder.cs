@@ -28,5 +28,35 @@ public static class DbSeeder
             context.Users.Add(adminUser);
             await context.SaveChangesAsync();
         }
+
+        if (!context.Users.Any(u => u.Username == "teacher"))
+        {
+            var teacherUser = new User
+            {
+                Username = "teacher",
+                Email = "teacher@quizcore.local",
+                FullName = "Demo Teacher",
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword("Teacher@123"),
+                Role = UserRole.Teacher,
+                Status = UserStatus.Active
+            };
+            context.Users.Add(teacherUser);
+            await context.SaveChangesAsync();
+        }
+        
+        if (!context.Users.Any(u => u.Username == "student"))
+        {
+            var studentUser = new User
+            {
+                Username = "student",
+                Email = "student@quizcore.local",
+                FullName = "Demo Student",
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword("Student@123"),
+                Role = UserRole.Student,
+                Status = UserStatus.Active
+            };
+            context.Users.Add(studentUser);
+            await context.SaveChangesAsync();
+        }
     }
 }

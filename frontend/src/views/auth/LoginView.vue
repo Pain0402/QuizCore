@@ -3,7 +3,9 @@
     <div class="auth-card">
       <!-- Logo -->
       <div class="auth-logo">
-        <div class="auth-logo-icon">🎯</div>
+        <div style="background:var(--primary);color:var(--bg-base);width:48px;height:48px;display:flex;align-items:center;justify-content:center;border-radius:12px;margin:0 auto 16px;box-shadow:2px 2px 0px var(--border-strong);border:2px solid var(--border-strong)">
+          <Target :size="28" stroke-width="2.5" />
+        </div>
         <h1>QuizCore</h1>
         <p>Hệ thống thi trắc nghiệm trực tuyến</p>
       </div>
@@ -55,15 +57,13 @@
         </button>
       </form>
 
-      <p style="margin-top:24px;text-align:center;font-size:0.8rem">
-        Tài khoản thử nghiệm: <code style="font-size:0.8rem">admin / Admin@123</code>
-      </p>
+
     </div>
   </div>
 </template>
 
 <script setup>
-import { Pencil, Trash, Search, ShieldAlert, FileQuestion, BookOpen, Clock } from 'lucide-vue-next'
+import { Target } from 'lucide-vue-next'
 import { reactive, ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'

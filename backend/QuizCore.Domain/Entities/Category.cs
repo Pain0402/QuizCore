@@ -11,4 +11,5 @@ public class Category
     
     public ICollection<Category> SubCategories { get; set; } = new List<Category>();
     public ICollection<Question> Questions { get; set; } = new List<Question>();
+
 }

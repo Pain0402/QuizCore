@@ -39,8 +39,9 @@
         <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px">
           <span class="badge badge-primary">📝 Đề thi</span>
           <div style="display:flex;gap:6px">
-            <button class="btn btn-ghost btn-icon btn-icon" @click="openEdit(exam)"><Pencil :size="16" stroke-width="2.5" /></button>
-            <button class="btn btn-danger btn-icon btn-icon" @click="confirmDelete(exam)"><Trash :size="16" stroke-width="2.5" /></button>
+            <button class="btn btn-icon" style="background:#fee2e2; color:#dc2626; border-color:#fca5a5" title="Dừng thi / Thu bài khẩn cấp" @click="confirmForceSubmit(exam)"><ShieldAlert :size="16" stroke-width="2.5" /></button>
+            <button class="btn btn-ghost btn-icon btn-icon" title="Chỉnh sửa" @click="openEdit(exam)"><Pencil :size="16" stroke-width="2.5" /></button>
+            <button class="btn btn-danger btn-icon btn-icon" title="Xóa" @click="confirmDelete(exam)"><Trash :size="16" stroke-width="2.5" /></button>
           </div>
         </div>
         <h3 style="font-size:1rem;margin-bottom:8px;color:var(--text-primary)">{{ exam.title }}</h3>
@@ -158,6 +159,33 @@
         </div>
       </div>
     </Transition>
+
+    <!-- Force Submit Modal -->
+    <Transition name="fade">
+      <div v-if="forceSubmitTarget" class="modal-overlay" @click.self="forceSubmitTarget = null">
+        <div class="modal modal-sm" style="border: 3px solid var(--danger); box-shadow: 6px 6px 0px rgba(220, 38, 38, 0.2);">
+          <div class="modal-header" style="border-bottom-color: var(--danger)">
+            <h3 class="modal-title" style="color:var(--danger); display:flex; align-items:center; gap:8px">
+              <ShieldAlert :size="20"/> Cảnh báo Khẩn
+            </h3>
+            <button class="modal-close" @click="forceSubmitTarget = null">×</button>
+          </div>
+          <div class="modal-body">
+            <p style="text-align:center">Bạn sắp phát lệnh <strong>Cưỡng chế nộp bài</strong> đối với đề thi "<strong>{{ forceSubmitTarget?.title }}</strong>".</p>
+            <div style="margin-top:12px; font-size:0.85rem; color: #dc2626; background: #fee2e2; padding: 12px; border-radius: 8px;">
+              Tất cả bài làm đang dang dở trên trình duyệt của thí sinh sẽ lập tức bị chốt lại và tống khỏi phòng thi.
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-secondary" @click="forceSubmitTarget = null">Hủy</button>
+            <button class="btn btn-danger" :disabled="saving" @click="doForceSubmit">
+              <span v-if="saving" class="spinner"></span>
+              Phát Lệnh Ngay
+            </button>
+          </div>
+        </div>
+      </div>
+    </Transition>
   </div>
 </template>
 
@@ -178,6 +206,7 @@ const saving      = ref(false)
 const showModal   = ref(false)
 const editingId   = ref(null)
 const deleteTarget = ref(null)
+const forceSubmitTarget = ref(null)
 const search      = ref('')
 
 const form = reactive({
@@ -241,6 +270,22 @@ async function openEdit(exam) {
 
 function closeModal() { showModal.value = false }
 function confirmDelete(exam) { deleteTarget.value = exam }
+function confirmForceSubmit(exam) { forceSubmitTarget.value = exam }
+
+async function doForceSubmit() {
+  saving.value = true
+  try {
+    const res = await examsApi.forceSubmit(forceSubmitTarget.value.id, "Hết giờ thi. Hệ thống đang tiến hành nộp bài tự động.")
+    if (res.data?.success) {
+      notify.success('Đã gửi hiệu lệnh', 'Toàn bộ bài làm dang dở đang được thu.')
+    }
+  } catch (err) {
+    notify.error('Lỗi truyền sóng', err.response?.data?.message || 'Không thể kích hoạt lệnh thu bài.')
+  } finally {
+    saving.value = false
+    forceSubmitTarget.value = null
+  }
+}
 
 async function saveExam() {
   if (!form.title.trim()) return notify.warn('Thiếu thông tin', 'Vui lòng nhập tiêu đề đề thi')
